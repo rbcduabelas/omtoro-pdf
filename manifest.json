@@ -2,7 +2,7 @@
   "name": "Om Toro PDF Editor",
   "short_name": "Om Toro PDF",
   "description": "Aplikasi edukasi dan corat-coret PDF interaktif buatan Om Toro",
-  "start_url": "./",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#e9ecef",
   "theme_color": "#004080",
