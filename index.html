@@ -15,105 +15,63 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #e9ecef;
+            margin: 0; padding: 0; background-color: #e9ecef;
             overflow-x: hidden; 
-            -webkit-touch-callout: none; 
-            -webkit-user-select: none;
-            user-select: none;
+            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
 
-        #pdf-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
+        #pdf-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
         .page-wrapper {
-            position: relative;
-            margin-bottom: 8px;
-            background-color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            width: 100%;
+            position: relative; margin-bottom: 8px; background-color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); width: 100%;
         }
 
-        .pdf-layer, .draw-layer {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-
-        .draw-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            cursor: crosshair;
-            touch-action: none;
-        }
-
+        .pdf-layer, .draw-layer { display: block; width: 100%; height: auto; }
+        .draw-layer { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; touch-action: none; }
         body.tool-hand-active .draw-layer { pointer-events: none; }
 
         .fab-open {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #004080;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 900;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background-color: #004080; color: white; padding: 15px 25px;
+            border-radius: 30px; font-size: 18px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 900;
+            display: flex; align-items: center; gap: 10px;
         }
         input[type="file"] { display: none; }
 
-        /* --- MENU MELAYANG VERTIKAL (GRID LAYOUT) --- */
+        /* --- MENU MELAYANG VERTIKAL 1 KOLOM (SUPER SLIM) --- */
         #floating-menu {
-            position: fixed;
-            background-color: #ffffff;
-            padding: 12px; 
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            z-index: 1000;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px; 
-            border: 2px solid #00bcd4;
-            width: max-content;
+            position: fixed; background-color: #ffffff;
+            padding: 8px 6px; border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; gap: 6px; 
+            border: 2px solid #00bcd4; width: 44px; /* Sangat Ramping */
         }
-
         .hidden { display: none !important; }
 
-        .full-width {
-            grid-column: span 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-
         .btn-icon {
-            padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
-            cursor: pointer; background: white; font-size: 16px; 
+            width: 36px; height: 36px; padding: 0; border: 1px solid #ddd; border-radius: 8px;
+            cursor: pointer; background: white; font-size: 18px; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        .btn-icon.active { background-color: #e0f7fa; border-color: #00bcd4; box-shadow: inset 0 0 5px rgba(0,188,212,0.3); }
+
+        .btn-upload-label {
+            width: 36px; height: 36px; padding: 0; border: 1px solid #ddd; border-radius: 8px;
+            cursor: pointer; background: #f1f8e9; font-size: 18px; 
             display: flex; justify-content: center; align-items: center;
         }
 
-        .btn-icon.active {
-            background-color: #e0f7fa; border-color: #00bcd4;
-            box-shadow: inset 0 0 5px rgba(0,188,212,0.3);
+        input[type="color"] { width: 36px; height: 36px; border: none; border-radius: 8px; cursor: pointer; padding: 0; }
+        
+        /* Slider Ketebalan Berdiri (Vertikal) */
+        input[type="range"] {
+            -webkit-appearance: slider-vertical; writing-mode: vertical-lr; direction: rtl;
+            width: 14px; height: 70px; margin: 4px 0; cursor: ns-resize;
         }
 
-        .btn-action { font-size: 12px; font-weight: bold; color: #333; gap: 4px; margin: 0; }
-        input[type="color"] { width: 35px; height: 35px; border: none; border-radius: 6px; cursor: pointer; }
-        input[type="range"] { width: 80px; height: 10px; }
+        .divider { width: 100%; height: 2px; background-color: #eee; border-radius: 2px; margin: 2px 0; }
 
         #loader {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -121,6 +79,7 @@
             border-radius: 8px; z-index: 2000; font-weight: bold; font-size: 14px;
         }
 
+        /* --- CSS SIGNATURE MODAL & OVERLAY --- */
         #signature-modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.6); z-index: 3000;
@@ -157,21 +116,18 @@
             z-index: 2500; display: flex; align-items: center; justify-content: center;
             touch-action: none; cursor: move;
         }
-        .sig-overlay-img {
-            width: 100%; height: 100%; object-fit: contain; pointer-events: none;
-        }
+        .sig-overlay-img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         .sig-overlay-handle {
             position: absolute; bottom: -12px; right: -12px; width: 26px; height: 26px;
             background: #00bcd4; color: white; border-radius: 50%; display: flex;
             align-items: center; justify-content: center; font-size: 16px; font-weight: bold;
             cursor: se-resize; box-shadow: 0 2px 5px rgba(0,0,0,0.3); touch-action: none;
         }
-        .sig-overlay-controls {
-            position: absolute; top: -45px; right: 0; display: flex; gap: 8px;
-        }
+        .sig-overlay-controls { position: absolute; top: -45px; right: -30px; display: flex; gap: 8px; }
         .sig-overlay-controls button {
-            background: white; border: 1px solid #ccc; border-radius: 6px; padding: 5px 15px;
+            background: white; border: 1px solid #ccc; border-radius: 50%; width: 34px; height: 34px;
             cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex; justify-content: center; align-items: center; padding: 0;
         }
     </style>
 </head>
@@ -193,37 +149,31 @@
         <button id="btn-brush" class="btn-icon" onclick="setTool('brush')" title="Kuas">🖌️</button>
         <button id="btn-highlighter" class="btn-icon" onclick="setTool('highlighter')" title="Stabilo">🖍️</button>
         <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
-        <button class="btn-icon" onclick="openSignatureModal()" style="background-color: #fff9c4;" title="Buat Tanda Tangan">✍️ TTD</button>
         
-        <div class="full-width" style="border-top: 1px solid #eee; padding-top: 8px; gap: 8px; margin-top: 4px;">
-            <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
-            <input type="range" id="size-slider" min="1" max="50" value="5" title="Ketebalan">
-        </div>
+        <div class="divider"></div>
+        <button class="btn-icon" onclick="openSignatureModal()" style="background-color: #fff9c4;" title="Buat Tanda Tangan">✍️</button>
+        <div class="divider"></div>
         
-        <div class="full-width" style="gap: 8px; margin-top: 4px;">
-            <button class="btn-icon" style="flex: 1;" onclick="undo()" title="Batal (Undo)">↩️ Undo</button>
-            <label class="btn-icon btn-action" style="flex: 1; background-color: #f1f8e9;" title="Buka File Lain">
-                📂 Buka
-                <input type="file" id="file-upload-menu" accept="application/pdf">
-            </label>
-        </div>
+        <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
+        <input type="range" id="size-slider" min="1" max="50" value="5" title="Ketebalan">
+        <button class="btn-icon" onclick="undo()" title="Batal (Undo)">↩️</button>
         
-        <div class="full-width" style="gap: 8px; margin-top: 4px;">
-            <button class="btn-icon btn-action" style="flex: 2; background-color: #e3f2fd;" onclick="savePDF()" title="Simpan sebagai PDF Baru">💾 Simpan</button>
-            <button class="btn-icon" style="flex: 1; color: red; border-color: red;" onclick="closeMenu()" title="Tutup Menu">✖</button>
-        </div>
+        <div class="divider"></div>
+        <label class="btn-upload-label" title="Buka File Lain">
+            📂<input type="file" id="file-upload-menu" accept="application/pdf">
+        </label>
+        <button class="btn-icon" style="background-color: #e3f2fd;" onclick="savePDF()" title="Simpan sebagai PDF Baru">💾</button>
+        <button class="btn-icon" style="color: red; border-color: red;" onclick="closeMenu()" title="Tutup Menu">✖</button>
     </div>
 
     <div id="signature-modal" class="hidden">
         <div class="sig-container">
             <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #333;">Tulis Tanda Tangan</h3>
-            
             <label class="btn-upload-sig">
                 📁 Upload File TTD (PNG/JPG)
                 <input type="file" id="upload-signature-file" accept="image/png, image/jpeg">
             </label>
             <p style="font-size: 11px; color: #777; margin: 5px 0;">-- Atau coret di bawah ini --</p>
-
             <canvas id="signature-canvas" width="300" height="150"></canvas>
             <div class="sig-buttons">
                 <button onclick="closeSignatureModal()" style="background: #ffebee; color: #c62828;">Batal</button>
@@ -241,29 +191,21 @@
         
         let pdfDoc = null;
         let activeCanvases = []; 
-        let currentFileName = "Tugas-Edukasi";
+        let currentFileName = "Dokumen";
 
         async function loadDocument(file) {
             if (!file) return;
             currentFileName = file.name.replace('.pdf', ''); 
-            
-            loader.textContent = 'Memuat PDF... ⏳';
-            loader.classList.remove('hidden');
-            document.getElementById('btn-open-initial').style.display = 'none'; 
-            closeMenu(); 
+            loader.textContent = 'Memuat PDF... ⏳'; loader.classList.remove('hidden');
+            document.getElementById('btn-open-initial').style.display = 'none'; closeMenu(); 
             
             const fileReader = new FileReader();
             fileReader.onload = async function() {
                 const typedarray = new Uint8Array(this.result);
                 try {
                     pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
-                    pdfContainer.innerHTML = ''; 
-                    activeCanvases = [];
-                    undoStack = [];
-
-                    for (let i = 1; i <= pdfDoc.numPages; i++) {
-                        await renderPage(i);
-                    }
+                    pdfContainer.innerHTML = ''; activeCanvases = []; undoStack = [];
+                    for (let i = 1; i <= pdfDoc.numPages; i++) await renderPage(i);
                 } catch (err) { alert('Gagal memuat PDF: ' + err.message); }
                 loader.classList.add('hidden'); 
             };
@@ -276,117 +218,83 @@
         async function renderPage(num) {
             const page = await pdfDoc.getPage(num);
             const containerWidth = window.innerWidth;
-            const unscaledViewport = page.getViewport({ scale: 1.0 });
-            const scale = containerWidth / unscaledViewport.width;
+            const scale = containerWidth / page.getViewport({ scale: 1.0 }).width;
             const pixelRatio = window.devicePixelRatio || 1;
             const viewport = page.getViewport({ scale: scale * pixelRatio });
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'page-wrapper';
-
-            const pdfCanvas = document.createElement('canvas');
-            pdfCanvas.className = 'pdf-layer';
-            
-            const drawCanvas = document.createElement('canvas');
-            drawCanvas.className = 'draw-layer';
+            const wrapper = document.createElement('div'); wrapper.className = 'page-wrapper';
+            const pdfCanvas = document.createElement('canvas'); pdfCanvas.className = 'pdf-layer';
+            const drawCanvas = document.createElement('canvas'); drawCanvas.className = 'draw-layer';
 
             pdfCanvas.width = viewport.width; pdfCanvas.height = viewport.height;
             drawCanvas.width = viewport.width; drawCanvas.height = viewport.height;
 
             await page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport: viewport }).promise;
 
-            wrapper.appendChild(pdfCanvas);
-            wrapper.appendChild(drawCanvas);
-            pdfContainer.appendChild(wrapper);
+            wrapper.appendChild(pdfCanvas); wrapper.appendChild(drawCanvas); pdfContainer.appendChild(wrapper);
 
             const drawCtx = drawCanvas.getContext('2d');
             activeCanvases.push({ canvas: drawCanvas, ctx: drawCtx, pdfCanvas: pdfCanvas });
-            
             setupDrawingEvents(drawCanvas, drawCtx);
         }
 
         async function savePDF() {
-            if (activeCanvases.length === 0) return alert("Tidak ada dokumen yang terbuka.");
-            
+            if (activeCanvases.length === 0) return alert("Tidak ada dokumen terbuka.");
             if (activeSigOverlay) applySignatureOverlay();
 
-            loader.textContent = 'Menyimpan PDF Baru... ⏳';
-            loader.classList.remove('hidden');
-            closeMenu();
-
+            loader.textContent = 'Menyimpan PDF Baru... ⏳'; loader.classList.remove('hidden'); closeMenu();
             const { jsPDF } = window.jspdf;
             const firstCanvas = activeCanvases[0].pdfCanvas;
             const orientation = firstCanvas.width > firstCanvas.height ? 'landscape' : 'portrait';
-            
             const pdf = new jsPDF({ orientation: orientation, unit: 'px', format: [firstCanvas.width, firstCanvas.height] });
 
             for (let i = 0; i < activeCanvases.length; i++) {
-                const drawCanvas = activeCanvases[i].canvas;
-                const pdfCanvas = activeCanvases[i].pdfCanvas;
-
+                const drawCanvas = activeCanvases[i].canvas; const pdfCanvas = activeCanvases[i].pdfCanvas;
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = pdfCanvas.width; tempCanvas.height = pdfCanvas.height;
                 const tempCtx = tempCanvas.getContext('2d');
 
-                tempCtx.fillStyle = '#ffffff';
-                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                tempCtx.drawImage(pdfCanvas, 0, 0);
-                tempCtx.drawImage(drawCanvas, 0, 0);
+                tempCtx.fillStyle = '#ffffff'; tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.drawImage(pdfCanvas, 0, 0); tempCtx.drawImage(drawCanvas, 0, 0);
 
                 const imgData = tempCanvas.toDataURL('image/jpeg', 1.0);
                 if (i > 0) pdf.addPage([tempCanvas.width, tempCanvas.height], tempCanvas.width > tempCanvas.height ? 'landscape' : 'portrait');
                 pdf.addImage(imgData, 'JPEG', 0, 0, tempCanvas.width, tempCanvas.height);
             }
-
-            pdf.save(`${currentFileName}-Terselesaikan.pdf`);
-            loader.classList.add('hidden');
+            pdf.save(`${currentFileName}-Terselesaikan.pdf`); loader.classList.add('hidden');
         }
 
+        // --- SISTEM MENU MELAYANG ---
         const floatingMenu = document.getElementById('floating-menu');
-        let longPressTimer;
-        let menuVisible = false;
+        let longPressTimer; let menuVisible = false;
 
         function showMenu(x, y) {
-            menuVisible = true;
-            floatingMenu.classList.remove('hidden');
-            
+            menuVisible = true; floatingMenu.classList.remove('hidden');
             const currentZoom = window.visualViewport ? window.visualViewport.scale : 1;
-            
-            floatingMenu.style.transform = `scale(${1 / currentZoom})`;
-            floatingMenu.style.transformOrigin = 'top left';
+            floatingMenu.style.transform = `scale(${1 / currentZoom})`; floatingMenu.style.transformOrigin = 'top left';
 
             const scaledWidth = floatingMenu.offsetWidth * (1 / currentZoom);
             const scaledHeight = floatingMenu.offsetHeight * (1 / currentZoom);
             let finalX = x; let finalY = y;
-
             if (x + scaledWidth > window.innerWidth) finalX = window.innerWidth - scaledWidth - 10;
             if (y + scaledHeight > window.innerHeight) finalY = window.innerHeight - scaledHeight - 10;
 
-            floatingMenu.style.left = finalX + 'px';
-            floatingMenu.style.top = finalY + 'px';
+            floatingMenu.style.left = finalX + 'px'; floatingMenu.style.top = finalY + 'px';
             navigator.vibrate && navigator.vibrate(50); 
         }
 
-        function closeMenu() {
-            floatingMenu.classList.add('hidden');
-            menuVisible = false;
-        }
+        function closeMenu() { floatingMenu.classList.add('hidden'); menuVisible = false; }
 
         window.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1 && !floatingMenu.contains(e.target) && !document.getElementById('signature-modal').contains(e.target) && !e.target.closest('.sig-overlay-box')) {
                 longPressTimer = setTimeout(() => { showMenu(e.touches[0].clientX, e.touches[0].clientY); }, 500);
             }
         }, { passive: false });
-
         window.addEventListener('touchmove', () => clearTimeout(longPressTimer));
         window.addEventListener('touchend', () => clearTimeout(longPressTimer));
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); if(!e.target.closest('.sig-overlay-box')) showMenu(e.clientX, e.clientY); });
 
-        window.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            if(!e.target.closest('.sig-overlay-box')) showMenu(e.clientX, e.clientY);
-        });
-
-        // --- MANAJEMEN TANDA TANGAN & UPLOAD ---
+        // --- MANAJEMEN TANDA TANGAN ---
         let storedSignature = null;
         const sigModal = document.getElementById('signature-modal');
         const sigCanvas = document.getElementById('signature-canvas');
@@ -395,39 +303,19 @@
         
         let isDrawingSig = false; let sigLastX = 0, sigLastY = 0;
 
-        function openSignatureModal() {
-            closeMenu(); sigModal.classList.remove('hidden');
-            clearSignature(); document.body.style.overflow = 'hidden'; 
-        }
-
-        function closeSignatureModal() {
-            sigModal.classList.add('hidden'); document.body.style.overflow = '';
-        }
-
+        function openSignatureModal() { closeMenu(); sigModal.classList.remove('hidden'); clearSignature(); document.body.style.overflow = 'hidden'; }
+        function closeSignatureModal() { sigModal.classList.add('hidden'); document.body.style.overflow = ''; }
         function clearSignature() { sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); }
-
-        function saveSignature() {
-            storedSignature = sigCanvas.toDataURL('image/png');
-            activateStampMode();
-        }
+        function saveSignature() { storedSignature = sigCanvas.toDataURL('image/png'); activateStampMode(); }
 
         document.getElementById('upload-signature-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(event) {
-                storedSignature = event.target.result;
-                activateStampMode();
-                e.target.value = ''; 
-            };
+            reader.onload = function(event) { storedSignature = event.target.result; activateStampMode(); e.target.value = ''; };
             reader.readAsDataURL(file);
         });
 
-        function activateStampMode() {
-            closeSignatureModal(); 
-            setTool('signature_stamp'); 
-            toastInstruction.classList.remove('hidden'); 
-        }
+        function activateStampMode() { closeSignatureModal(); setTool('signature_stamp'); toastInstruction.classList.remove('hidden'); }
 
         function getSigPos(e) {
             const rect = sigCanvas.getBoundingClientRect();
@@ -436,123 +324,81 @@
         }
 
         function startSigDraw(e) {
-            isDrawingSig = true; const pos = getSigPos(e);
-            sigLastX = pos.x; sigLastY = pos.y;
+            isDrawingSig = true; const pos = getSigPos(e); sigLastX = pos.x; sigLastY = pos.y;
             sigCtx.lineWidth = 3; sigCtx.lineCap = 'round'; sigCtx.strokeStyle = '#000000';
-            sigCtx.beginPath(); sigCtx.moveTo(sigLastX, sigLastY);
-            if(e.cancelable) e.preventDefault();
+            sigCtx.beginPath(); sigCtx.moveTo(sigLastX, sigLastY); if(e.cancelable) e.preventDefault();
         }
-
         function drawSig(e) {
             if (!isDrawingSig) return; const pos = getSigPos(e);
-            sigCtx.lineTo(pos.x, pos.y); sigCtx.stroke();
-            sigCtx.beginPath(); sigCtx.moveTo(pos.x, pos.y);
-            sigLastX = pos.x; sigLastY = pos.y;
-            if(e.cancelable) e.preventDefault();
+            sigCtx.lineTo(pos.x, pos.y); sigCtx.stroke(); sigCtx.beginPath(); sigCtx.moveTo(pos.x, pos.y);
+            sigLastX = pos.x; sigLastY = pos.y; if(e.cancelable) e.preventDefault();
         }
-
         function stopSigDraw() { isDrawingSig = false; sigCtx.closePath(); }
 
-        sigCanvas.addEventListener('mousedown', startSigDraw);
-        sigCanvas.addEventListener('mousemove', drawSig);
-        window.addEventListener('mouseup', stopSigDraw);
-        sigCanvas.addEventListener('touchstart', startSigDraw, { passive: false });
-        sigCanvas.addEventListener('touchmove', drawSig, { passive: false });
-        window.addEventListener('touchend', stopSigDraw);
+        sigCanvas.addEventListener('mousedown', startSigDraw); sigCanvas.addEventListener('mousemove', drawSig); window.addEventListener('mouseup', stopSigDraw);
+        sigCanvas.addEventListener('touchstart', startSigDraw, { passive: false }); sigCanvas.addEventListener('touchmove', drawSig, { passive: false }); window.addEventListener('touchend', stopSigDraw);
 
         // --- ALAT TULIS ---
         let currentTool = 'hand';
-        
         function setTool(tool) {
             currentTool = tool;
-            document.querySelectorAll('#tool-buttons button').forEach(btn => btn.classList.remove('active'));
-            if(tool !== 'signature_stamp') document.getElementById(`btn-${tool}`).classList.add('active');
-
-            if (tool === 'hand') document.body.classList.add('tool-hand-active');
-            else document.body.classList.remove('tool-hand-active');
-
+            document.querySelectorAll('#floating-menu button.btn-icon').forEach(btn => btn.classList.remove('active'));
+            if(tool !== 'signature_stamp') {
+                const activeBtn = document.getElementById(`btn-${tool}`);
+                if(activeBtn) activeBtn.classList.add('active');
+            }
+            if (tool === 'hand') document.body.classList.add('tool-hand-active'); else document.body.classList.remove('tool-hand-active');
             if (tool !== 'signature_stamp') toastInstruction.classList.add('hidden');
         }
 
         function applyToolSettings(ctx) {
             const color = document.getElementById('color-picker').value;
             const size = parseInt(document.getElementById('size-slider').value);
-            const pixelRatio = window.devicePixelRatio || 1; 
-            const adjustedSize = size * pixelRatio;
-
+            const pixelRatio = window.devicePixelRatio || 1; const adjustedSize = size * pixelRatio;
             ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-            if (currentTool === 'eraser') {
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.globalAlpha = 1.0; ctx.lineWidth = adjustedSize * 4; 
-            } else if (currentTool === 'highlighter') {
-                ctx.globalCompositeOperation = 'source-over'; 
-                ctx.globalAlpha = 0.10; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize * 4; 
-            } else if (currentTool === 'brush') {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.globalAlpha = 1.0; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize * 2; 
-            } else { 
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.globalAlpha = 1.0; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize; 
-            }
+            if (currentTool === 'eraser') { ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1.0; ctx.lineWidth = adjustedSize * 4; } 
+            else if (currentTool === 'highlighter') { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 0.10; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize * 4; } 
+            else if (currentTool === 'brush') { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1.0; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize * 2; } 
+            else { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1.0; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize; }
         }
 
-        // --- LOGIKA OVERLAY DINAMIS (GESER, ZOOM & PUTAR TTD) ---
+        // --- OVERLAY TTD DENGAN FIX ROTATE ---
         let activeSigOverlay = null;
 
         function spawnSignatureOverlay(canvas, ctx, e) {
             if (activeSigOverlay) applySignatureOverlay(); 
 
-            const wrapper = canvas.parentElement;
-            const rect = canvas.getBoundingClientRect();
-            
+            const wrapper = canvas.parentElement; const rect = canvas.getBoundingClientRect();
             let clientX = e.touches ? e.touches[0].clientX : e.clientX;
             let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            let cssX = clientX - rect.left;
-            let cssY = clientY - rect.top;
+            let cssX = clientX - rect.left; let cssY = clientY - rect.top;
 
-            activeSigOverlay = document.createElement('div');
-            activeSigOverlay.className = 'sig-overlay-box';
-            activeSigOverlay.canvasRef = canvas;
-            activeSigOverlay.ctxRef = ctx;
-            activeSigOverlay.dataset.rotation = 0; // Simpan nilai putaran
+            activeSigOverlay = document.createElement('div'); activeSigOverlay.className = 'sig-overlay-box';
+            activeSigOverlay.canvasRef = canvas; activeSigOverlay.ctxRef = ctx;
+            activeSigOverlay.dataset.rotation = 0; 
 
-            const img = document.createElement('img');
-            img.src = storedSignature;
-            img.className = 'sig-overlay-img';
+            const img = document.createElement('img'); img.src = storedSignature; img.className = 'sig-overlay-img';
             activeSigOverlay.appendChild(img);
 
-            const controls = document.createElement('div');
-            controls.className = 'sig-overlay-controls';
+            const controls = document.createElement('div'); controls.className = 'sig-overlay-controls';
             
-            // TOMBOL ROTATE BARU 
             const btnRotate = document.createElement('button'); btnRotate.innerHTML = '↻'; btnRotate.style.color = '#f57c00';
             const btnDel = document.createElement('button'); btnDel.innerHTML = '✖'; btnDel.style.color = '#c62828';
             const btnOk = document.createElement('button'); btnOk.innerHTML = '✔'; btnOk.style.color = '#2e7d32';
             
-            controls.appendChild(btnRotate);
-            controls.appendChild(btnDel); 
-            controls.appendChild(btnOk);
+            controls.appendChild(btnRotate); controls.appendChild(btnDel); controls.appendChild(btnOk);
             activeSigOverlay.appendChild(controls);
 
-            const handle = document.createElement('div');
-            handle.className = 'sig-overlay-handle';
-            handle.innerHTML = '⤡';
-            activeSigOverlay.appendChild(handle);
-
-            wrapper.appendChild(activeSigOverlay);
+            const handle = document.createElement('div'); handle.className = 'sig-overlay-handle'; handle.innerHTML = '⤡';
+            activeSigOverlay.appendChild(handle); wrapper.appendChild(activeSigOverlay);
 
             const tempImg = new Image();
             tempImg.onload = () => {
-                let baseW = 150;
-                let baseH = (tempImg.height / tempImg.width) * baseW;
+                let baseW = 150; let baseH = (tempImg.height / tempImg.width) * baseW;
                 if (baseH > 100) { baseH = 100; baseW = (tempImg.width / tempImg.height) * baseH; }
-                
-                activeSigOverlay.style.width = baseW + 'px';
-                activeSigOverlay.style.height = baseH + 'px';
-                activeSigOverlay.style.left = (cssX - baseW/2) + 'px';
-                activeSigOverlay.style.top = (cssY - baseH/2) + 'px';
+                activeSigOverlay.style.width = baseW + 'px'; activeSigOverlay.style.height = baseH + 'px';
+                activeSigOverlay.style.left = (cssX - baseW/2) + 'px'; activeSigOverlay.style.top = (cssY - baseH/2) + 'px';
             };
             tempImg.src = storedSignature;
 
@@ -562,120 +408,88 @@
             const startDrag = (ev) => {
                 if (ev.target === handle || ev.target.tagName === 'BUTTON') return;
                 isDraggingSig = true;
-                startX = ev.touches ? ev.touches[0].clientX : ev.clientX;
-                startY = ev.touches ? ev.touches[0].clientY : ev.clientY;
-                initLeft = parseFloat(activeSigOverlay.style.left);
-                initTop = parseFloat(activeSigOverlay.style.top);
+                startX = ev.touches ? ev.touches[0].clientX : ev.clientX; startY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+                initLeft = parseFloat(activeSigOverlay.style.left); initTop = parseFloat(activeSigOverlay.style.top);
                 ev.preventDefault();
             };
-
             const startResize = (ev) => {
-                isResizingSig = true;
-                startX = ev.touches ? ev.touches[0].clientX : ev.clientX;
-                initW = parseFloat(activeSigOverlay.style.width);
-                initH = parseFloat(activeSigOverlay.style.height);
+                isResizingSig = true; startX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+                initW = parseFloat(activeSigOverlay.style.width); initH = parseFloat(activeSigOverlay.style.height);
                 ev.preventDefault(); ev.stopPropagation();
             };
-
             const onMove = (ev) => {
-                let curX = ev.touches ? ev.touches[0].clientX : ev.clientX;
-                let curY = ev.touches ? ev.touches[0].clientY : ev.clientY;
-                
+                let curX = ev.touches ? ev.touches[0].clientX : ev.clientX; let curY = ev.touches ? ev.touches[0].clientY : ev.clientY;
                 if (isDraggingSig) {
                     activeSigOverlay.style.left = (initLeft + (curX - startX)) + 'px';
                     activeSigOverlay.style.top = (initTop + (curY - startY)) + 'px';
                     ev.preventDefault();
                 }
                 if (isResizingSig) {
-                    let dx = curX - startX;
-                    let newW = Math.max(50, initW + dx); 
-                    let newH = newW * (initH / initW); 
-                    activeSigOverlay.style.width = newW + 'px';
-                    activeSigOverlay.style.height = newH + 'px';
+                    let newW = Math.max(50, initW + (curX - startX)); let newH = newW * (initH / initW); 
+                    activeSigOverlay.style.width = newW + 'px'; activeSigOverlay.style.height = newH + 'px';
                     ev.preventDefault();
                 }
             };
-
             const onUp = () => { isDraggingSig = false; isResizingSig = false; };
 
-            activeSigOverlay.addEventListener('mousedown', startDrag);
-            activeSigOverlay.addEventListener('touchstart', startDrag, {passive:false});
-            handle.addEventListener('mousedown', startResize);
-            handle.addEventListener('touchstart', startResize, {passive:false});
-
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('touchmove', onMove, {passive:false});
-            document.addEventListener('mouseup', onUp);
-            document.addEventListener('touchend', onUp);
+            activeSigOverlay.addEventListener('mousedown', startDrag); activeSigOverlay.addEventListener('touchstart', startDrag, {passive:false});
+            handle.addEventListener('mousedown', startResize); handle.addEventListener('touchstart', startResize, {passive:false});
+            document.addEventListener('mousemove', onMove); document.addEventListener('touchmove', onMove, {passive:false});
+            document.addEventListener('mouseup', onUp); document.addEventListener('touchend', onUp);
 
             const cleanEvents = () => {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                document.removeEventListener('touchend', onUp);
+                document.removeEventListener('mousemove', onMove); document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('mouseup', onUp); document.removeEventListener('touchend', onUp);
             };
 
-            // FUNGSI ROTATE
-            btnRotate.onclick = (ev) => {
-                ev.preventDefault();
+            // JURUS ANTI FREEZE ROTATE (Hentikan Event Bocor)
+            const doRotate = (ev) => {
+                ev.preventDefault(); ev.stopPropagation(); // Kunci event agar tidak tabrakan dengan Drag
+                if (!activeSigOverlay) return;
                 let currentRot = parseInt(activeSigOverlay.dataset.rotation || 0);
                 currentRot = (currentRot + 90) % 360;
                 activeSigOverlay.dataset.rotation = currentRot;
                 activeSigOverlay.style.transform = `rotate(${currentRot}deg)`;
             };
+            btnRotate.addEventListener('mousedown', doRotate);
+            btnRotate.addEventListener('touchstart', doRotate, {passive: false});
 
-            btnDel.onclick = () => { activeSigOverlay.remove(); activeSigOverlay = null; cleanEvents(); setTool('hand'); };
-            btnOk.onclick = () => { applySignatureOverlay(); cleanEvents(); };
+            const doDel = (ev) => { ev.preventDefault(); ev.stopPropagation(); activeSigOverlay.remove(); activeSigOverlay = null; cleanEvents(); setTool('hand'); };
+            btnDel.addEventListener('mousedown', doDel); btnDel.addEventListener('touchstart', doDel, {passive: false});
+
+            const doOk = (ev) => { ev.preventDefault(); ev.stopPropagation(); applySignatureOverlay(); cleanEvents(); };
+            btnOk.addEventListener('mousedown', doOk); btnOk.addEventListener('touchstart', doOk, {passive: false});
         }
 
         function applySignatureOverlay() {
             if (!activeSigOverlay) return;
-            const canvas = activeSigOverlay.canvasRef;
-            const ctx = activeSigOverlay.ctxRef;
-
-            const cssLeft = parseFloat(activeSigOverlay.style.left);
-            const cssTop = parseFloat(activeSigOverlay.style.top);
-            const cssWidth = parseFloat(activeSigOverlay.style.width);
-            const cssHeight = parseFloat(activeSigOverlay.style.height);
+            const canvas = activeSigOverlay.canvasRef; const ctx = activeSigOverlay.ctxRef;
+            const cssLeft = parseFloat(activeSigOverlay.style.left); const cssTop = parseFloat(activeSigOverlay.style.top);
+            const cssWidth = parseFloat(activeSigOverlay.style.width); const cssHeight = parseFloat(activeSigOverlay.style.height);
             const rotationDeg = parseInt(activeSigOverlay.dataset.rotation || 0);
 
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const canvasX = cssLeft * scaleX;
-            const canvasY = cssTop * scaleY;
-            const canvasW = cssWidth * scaleX;
-            const canvasH = cssHeight * scaleY;
+            const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+            const canvasX = cssLeft * scaleX; const canvasY = cssTop * scaleY;
+            const canvasW = cssWidth * scaleX; const canvasH = cssHeight * scaleY;
 
             saveState(canvas, ctx);
 
             const img = new Image();
             img.onload = () => {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.globalAlpha = 1.0;
-                
-                // Menerapkan Rotasi pada Canvas saat menempelkan gambar
+                ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1.0;
                 ctx.save();
-                // Geser titik poros ke tengah kotak Tanda Tangan
                 ctx.translate(canvasX + (canvasW / 2), canvasY + (canvasH / 2));
-                // Putar porosnya
                 ctx.rotate(rotationDeg * Math.PI / 180);
-                // Gambar menempel relatif ke titik tengah yang baru
                 ctx.drawImage(img, -canvasW / 2, -canvasH / 2, canvasW, canvasH);
                 ctx.restore();
 
-                activeSigOverlay.remove();
-                activeSigOverlay = null;
-                setTool('hand');
+                activeSigOverlay.remove(); activeSigOverlay = null; setTool('hand');
             };
             img.src = storedSignature;
         }
 
         // --- LOGIKA MENGGAMBAR ---
-        let isDrawing = false;
-        let lastX = 0; let lastY = 0;
-        let undoStack = []; 
+        let isDrawing = false; let lastX = 0; let lastY = 0; let undoStack = []; 
 
         function saveState(canvas, ctx) {
             undoStack.push({ ctx: ctx, data: ctx.getImageData(0, 0, canvas.width, canvas.height) });
@@ -683,68 +497,44 @@
         }
 
         function undo() {
-            if (undoStack.length > 0) {
-                const prevState = undoStack.pop();
-                prevState.ctx.putImageData(prevState.data, 0, 0);
-            }
+            if (undoStack.length > 0) { const prevState = undoStack.pop(); prevState.ctx.putImageData(prevState.data, 0, 0); }
         }
 
         function setupDrawingEvents(canvas, ctx) {
             function getCoordinates(e) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;   
-                const scaleY = canvas.height / rect.height;  
+                const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;  
                 if (e.touches) return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
                 else return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
             }
 
             function startDraw(e) {
                 if (menuVisible) return; 
-
                 if (currentTool === 'signature_stamp' && storedSignature) {
-                    spawnSignatureOverlay(canvas, ctx, e);
-                    if(e.cancelable) e.preventDefault();
-                    return; 
+                    spawnSignatureOverlay(canvas, ctx, e); if(e.cancelable) e.preventDefault(); return; 
                 }
-
                 if (currentTool === 'hand') return; 
 
-                isDrawing = true;
-                saveState(canvas, ctx); 
-                applyToolSettings(ctx);
-
-                const pos = getCoordinates(e);
-                lastX = pos.x; lastY = pos.y;
-                ctx.beginPath(); ctx.moveTo(lastX, lastY);
-                if(e.cancelable) e.preventDefault();
+                isDrawing = true; saveState(canvas, ctx); applyToolSettings(ctx);
+                const pos = getCoordinates(e); lastX = pos.x; lastY = pos.y;
+                ctx.beginPath(); ctx.moveTo(lastX, lastY); if(e.cancelable) e.preventDefault();
             }
 
             function draw(e) {
                 if (!isDrawing || currentTool === 'hand' || currentTool === 'signature_stamp') return;
-                const pos = getCoordinates(e);
-                ctx.lineTo(pos.x, pos.y); ctx.stroke();
-                
-                ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-                lastX = pos.x; lastY = pos.y;
+                const pos = getCoordinates(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pos.x, pos.y); lastX = pos.x; lastY = pos.y;
                 if(e.cancelable) e.preventDefault();
             }
 
             function stopDraw() { if (isDrawing) { isDrawing = false; ctx.closePath(); } }
 
-            canvas.addEventListener('mousedown', startDraw);
-            canvas.addEventListener('mousemove', draw);
-            window.addEventListener('mouseup', stopDraw);
-
-            canvas.addEventListener('touchstart', startDraw, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            window.addEventListener('touchend', stopDraw);
+            canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('touchstart', startDraw, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); window.addEventListener('touchend', stopDraw);
         }
         
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker Om Toro Siap!', reg))
-                    .catch(err => console.log('Service Worker Gagal:', err));
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('Service Worker Om Toro Siap!', reg)).catch(err => console.log('Service Worker Gagal:', err));
             });
         }
     </script>
