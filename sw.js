@@ -1,4 +1,4 @@
-const CACHE_NAME = 'omtoro-pdf-v4';
+const CACHE_NAME = 'omtoro-pdf-v5';
 const urlsToCache = [
     'index.html',
     'manifest.json',
