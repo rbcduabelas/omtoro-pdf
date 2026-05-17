@@ -75,26 +75,35 @@
         }
         input[type="file"] { display: none; }
 
+        /* --- MENU MELAYANG VERTIKAL (GRID LAYOUT) --- */
         #floating-menu {
             position: fixed;
             background-color: #ffffff;
-            padding: 8px 10px; 
-            border-radius: 10px;
+            padding: 12px; 
+            border-radius: 12px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 6px; 
-            border: 1px solid #00bcd4;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px; 
+            border: 2px solid #00bcd4;
+            width: max-content;
         }
 
         .hidden { display: none !important; }
 
-        .menu-row { display: flex; gap: 6px; align-items: center; justify-content: center; }
+        .full-width {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
 
         .btn-icon {
-            padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px;
-            cursor: pointer; background: white; font-size: 15px; 
+            padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
+            cursor: pointer; background: white; font-size: 16px; 
+            display: flex; justify-content: center; align-items: center;
         }
 
         .btn-icon.active {
@@ -102,9 +111,9 @@
             box-shadow: inset 0 0 5px rgba(0,188,212,0.3);
         }
 
-        .btn-action { font-size: 12px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 4px; }
-        input[type="color"] { width: 25px; height: 25px; border: none; border-radius: 4px; cursor: pointer; }
-        input[type="range"] { width: 65px; height: 10px; }
+        .btn-action { font-size: 12px; font-weight: bold; color: #333; gap: 4px; margin: 0; }
+        input[type="color"] { width: 35px; height: 35px; border: none; border-radius: 6px; cursor: pointer; }
+        input[type="range"] { width: 80px; height: 10px; }
 
         #loader {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -179,30 +188,29 @@
     </label>
 
     <div id="floating-menu" class="hidden">
-        <div class="menu-row" id="tool-buttons">
-            <button id="btn-hand" class="btn-icon active" onclick="setTool('hand')" title="Geser Layar">✋</button>
-            <button id="btn-pen" class="btn-icon" onclick="setTool('pen')" title="Pensil">✏️</button>
-            <button id="btn-brush" class="btn-icon" onclick="setTool('brush')" title="Kuas">🖌️</button>
-            <button id="btn-highlighter" class="btn-icon" onclick="setTool('highlighter')" title="Stabilo">🖍️</button>
-            <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
-            <button class="btn-icon" onclick="openSignatureModal()" style="background-color: #fff9c4;" title="Buat Tanda Tangan">✍️ TTD</button>
-        </div>
+        <button id="btn-hand" class="btn-icon active" onclick="setTool('hand')" title="Geser Layar">✋</button>
+        <button id="btn-pen" class="btn-icon" onclick="setTool('pen')" title="Pensil">✏️</button>
+        <button id="btn-brush" class="btn-icon" onclick="setTool('brush')" title="Kuas">🖌️</button>
+        <button id="btn-highlighter" class="btn-icon" onclick="setTool('highlighter')" title="Stabilo">🖍️</button>
+        <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
+        <button class="btn-icon" onclick="openSignatureModal()" style="background-color: #fff9c4;" title="Buat Tanda Tangan">✍️ TTD</button>
         
-        <div class="menu-row">
+        <div class="full-width" style="border-top: 1px solid #eee; padding-top: 8px; gap: 8px; margin-top: 4px;">
             <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
             <input type="range" id="size-slider" min="1" max="50" value="5" title="Ketebalan">
-            <button class="btn-icon" onclick="undo()" title="Batal (Undo)">↩️</button>
         </div>
         
-        <div class="menu-row" style="margin-top: 4px; padding-top: 6px; border-top: 1px solid #eee;">
-            <label class="btn-icon btn-action" style="background-color: #f1f8e9;" title="Buka File Lain">
+        <div class="full-width" style="gap: 8px; margin-top: 4px;">
+            <button class="btn-icon" style="flex: 1;" onclick="undo()" title="Batal (Undo)">↩️ Undo</button>
+            <label class="btn-icon btn-action" style="flex: 1; background-color: #f1f8e9;" title="Buka File Lain">
                 📂 Buka
                 <input type="file" id="file-upload-menu" accept="application/pdf">
             </label>
-            <button class="btn-icon btn-action" style="background-color: #e3f2fd;" onclick="savePDF()" title="Simpan sebagai PDF Baru">
-                💾 Simpan
-            </button>
-            <button class="btn-icon" onclick="closeMenu()" style="color: red; border-color: red;" title="Tutup Menu">✖</button>
+        </div>
+        
+        <div class="full-width" style="gap: 8px; margin-top: 4px;">
+            <button class="btn-icon btn-action" style="flex: 2; background-color: #e3f2fd;" onclick="savePDF()" title="Simpan sebagai PDF Baru">💾 Simpan</button>
+            <button class="btn-icon" style="flex: 1; color: red; border-color: red;" onclick="closeMenu()" title="Tutup Menu">✖</button>
         </div>
     </div>
 
@@ -489,7 +497,7 @@
             }
         }
 
-        // --- LOGIKA OVERLAY DINAMIS (GESER & ZOOM TTD) ---
+        // --- LOGIKA OVERLAY DINAMIS (GESER, ZOOM & PUTAR TTD) ---
         let activeSigOverlay = null;
 
         function spawnSignatureOverlay(canvas, ctx, e) {
@@ -508,6 +516,7 @@
             activeSigOverlay.className = 'sig-overlay-box';
             activeSigOverlay.canvasRef = canvas;
             activeSigOverlay.ctxRef = ctx;
+            activeSigOverlay.dataset.rotation = 0; // Simpan nilai putaran
 
             const img = document.createElement('img');
             img.src = storedSignature;
@@ -516,9 +525,15 @@
 
             const controls = document.createElement('div');
             controls.className = 'sig-overlay-controls';
+            
+            // TOMBOL ROTATE BARU 
+            const btnRotate = document.createElement('button'); btnRotate.innerHTML = '↻'; btnRotate.style.color = '#f57c00';
             const btnDel = document.createElement('button'); btnDel.innerHTML = '✖'; btnDel.style.color = '#c62828';
             const btnOk = document.createElement('button'); btnOk.innerHTML = '✔'; btnOk.style.color = '#2e7d32';
-            controls.appendChild(btnDel); controls.appendChild(btnOk);
+            
+            controls.appendChild(btnRotate);
+            controls.appendChild(btnDel); 
+            controls.appendChild(btnOk);
             activeSigOverlay.appendChild(controls);
 
             const handle = document.createElement('div');
@@ -600,6 +615,15 @@
                 document.removeEventListener('touchend', onUp);
             };
 
+            // FUNGSI ROTATE
+            btnRotate.onclick = (ev) => {
+                ev.preventDefault();
+                let currentRot = parseInt(activeSigOverlay.dataset.rotation || 0);
+                currentRot = (currentRot + 90) % 360;
+                activeSigOverlay.dataset.rotation = currentRot;
+                activeSigOverlay.style.transform = `rotate(${currentRot}deg)`;
+            };
+
             btnDel.onclick = () => { activeSigOverlay.remove(); activeSigOverlay = null; cleanEvents(); setTool('hand'); };
             btnOk.onclick = () => { applySignatureOverlay(); cleanEvents(); };
         }
@@ -613,6 +637,7 @@
             const cssTop = parseFloat(activeSigOverlay.style.top);
             const cssWidth = parseFloat(activeSigOverlay.style.width);
             const cssHeight = parseFloat(activeSigOverlay.style.height);
+            const rotationDeg = parseInt(activeSigOverlay.dataset.rotation || 0);
 
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -629,7 +654,17 @@
             img.onload = () => {
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.globalAlpha = 1.0;
-                ctx.drawImage(img, canvasX, canvasY, canvasW, canvasH);
+                
+                // Menerapkan Rotasi pada Canvas saat menempelkan gambar
+                ctx.save();
+                // Geser titik poros ke tengah kotak Tanda Tangan
+                ctx.translate(canvasX + (canvasW / 2), canvasY + (canvasH / 2));
+                // Putar porosnya
+                ctx.rotate(rotationDeg * Math.PI / 180);
+                // Gambar menempel relatif ke titik tengah yang baru
+                ctx.drawImage(img, -canvasW / 2, -canvasH / 2, canvasW, canvasH);
+                ctx.restore();
+
                 activeSigOverlay.remove();
                 activeSigOverlay = null;
                 setTool('hand');
@@ -705,7 +740,6 @@
             window.addEventListener('touchend', stopDraw);
         }
         
-        // Daftarkan Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
