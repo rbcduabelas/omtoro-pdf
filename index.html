@@ -29,8 +29,9 @@
 
         .pdf-layer, .draw-layer { display: block; width: 100%; height: auto; }
         
-        /* touch-action: none; DIHAPUS agar 2 Jari bisa berfungsi untuk native Zoom dan Scroll */
+        /* GEMBOK DIHAPUS: touch-action: none sudah dihilangkan dari draw-layer! */
         .draw-layer { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
+        
         body.tool-hand-active .draw-layer { pointer-events: none; }
 
         .fab-open {
@@ -42,18 +43,14 @@
         }
         input[type="file"] { display: none; }
 
-        /* --- MENU MELAYANG 1 KOLOM (SUPER SLIM & BISA DI-SCROLL) --- */
+        /* --- MENU MELAYANG 1 KOLOM SCROLLABLE --- */
         #floating-menu {
             position: fixed; background-color: #ffffff;
             padding: 6px 4px; border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
             display: flex; flex-direction: column; align-items: center; gap: 4px; 
             border: 2px solid #00bcd4; width: 36px;
-            
-            max-height: 60vh;
-            overflow-y: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            max-height: 60vh; overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none;
         }
         #floating-menu::-webkit-scrollbar { display: none; }
 
@@ -63,8 +60,7 @@
             width: 30px; height: 30px; min-height: 30px; padding: 0; 
             border: 1px solid #ddd; border-radius: 8px;
             cursor: pointer; background: white; font-size: 15px; 
-            display: flex; justify-content: center; align-items: center;
-            flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
         }
         .btn-upload-label { background: #f1f8e9; }
         .btn-icon.active { background-color: #e0f7fa; border-color: #00bcd4; box-shadow: inset 0 0 5px rgba(0,188,212,0.3); }
@@ -73,7 +69,6 @@
             width: 30px; height: 30px; min-height: 30px; 
             border: none; border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;
         }
-        
         input[type="range"] {
             -webkit-appearance: slider-vertical; writing-mode: vertical-lr; direction: rtl;
             width: 12px; height: 50px; min-height: 50px; margin: 2px 0; cursor: ns-resize; flex-shrink: 0;
@@ -87,6 +82,7 @@
             border-radius: 8px; z-index: 2000; font-weight: bold; font-size: 14px;
         }
 
+        /* --- CSS SIGNATURE MODAL & OVERLAY --- */
         #signature-modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.6); z-index: 3000;
@@ -300,7 +296,6 @@
         window.addEventListener('touchend', () => clearTimeout(longPressTimer));
         window.addEventListener('contextmenu', (e) => { e.preventDefault(); if(!e.target.closest('.sig-overlay-box')) showMenu(e.clientX, e.clientY); });
 
-        // --- MANAJEMEN TANDA TANGAN ---
         let storedSignature = null;
         const sigModal = document.getElementById('signature-modal');
         const sigCanvas = document.getElementById('signature-canvas');
@@ -344,7 +339,6 @@
         sigCanvas.addEventListener('mousedown', startSigDraw); sigCanvas.addEventListener('mousemove', drawSig); window.addEventListener('mouseup', stopSigDraw);
         sigCanvas.addEventListener('touchstart', startSigDraw, { passive: false }); sigCanvas.addEventListener('touchmove', drawSig, { passive: false }); window.addEventListener('touchend', stopSigDraw);
 
-        // --- ALAT TULIS ---
         let currentTool = 'hand';
         function setTool(tool) {
             currentTool = tool;
@@ -369,7 +363,6 @@
             else { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1.0; ctx.strokeStyle = color; ctx.lineWidth = adjustedSize; }
         }
 
-        // --- OVERLAY TTD ---
         let activeSigOverlay = null;
 
         function spawnSignatureOverlay(canvas, ctx, e) {
@@ -515,15 +508,16 @@
             function startDraw(e) {
                 if (menuVisible) return; 
 
-                // BYPASS MULTI-TOUCH: Jika terdeteksi 2 jari atau lebih, abaikan perintah menggambar
+                // BYPASS MULTI-TOUCH: Jika terdeteksi 2 jari, batalkan coretan agar browser bisa Zoom/Scroll
                 if (e.touches && e.touches.length > 1) {
                     isDrawing = false;
-                    return; // Return tanpa preventDefault agar browser melakukan Native Zoom/Scroll
+                    return; 
                 }
 
                 if (currentTool === 'signature_stamp' && storedSignature) {
                     spawnSignatureOverlay(canvas, ctx, e); 
-                    if(e.cancelable && (!e.touches || e.touches.length === 1)) e.preventDefault(); 
+                    // Tahan scroll untuk mouse biasa
+                    if(!e.touches && e.cancelable) e.preventDefault(); 
                     return; 
                 }
 
@@ -533,22 +527,24 @@
                 const pos = getCoordinates(e); lastX = pos.x; lastY = pos.y;
                 ctx.beginPath(); ctx.moveTo(lastX, lastY); 
                 
-                // Mencegah scroll HANYA jika yang menyentuh layar cuma 1 jari
-                if(e.cancelable && (!e.touches || e.touches.length === 1)) e.preventDefault();
+                // JANGAN panggil e.preventDefault() di touchstart untuk layar sentuh, agar jari kedua tetap bisa mendeteksi zoom!
+                if(!e.touches && e.cancelable) e.preventDefault(); 
             }
 
             function draw(e) {
-                // BYPASS MULTI-TOUCH SAAT SEDANG MENCORET
+                // BYPASS MULTI-TOUCH: Jika jari kedua menempel di tengah coretan, langsung putus garisnya!
                 if (e.touches && e.touches.length > 1) {
-                    isDrawing = false; // Batalkan tarikan garis jika jari kedua menyentuh layar
+                    isDrawing = false; 
                     return; 
                 }
 
                 if (!isDrawing || currentTool === 'hand' || currentTool === 'signature_stamp') return;
+                
+                // KUNCI PENTING: Panggil preventDefault HANYA saat 1 jari bergerak mencoret untuk menahan layar
+                if(e.cancelable && e.touches && e.touches.length === 1) e.preventDefault();
+
                 const pos = getCoordinates(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(pos.x, pos.y); lastX = pos.x; lastY = pos.y;
-                
-                if(e.cancelable && (!e.touches || e.touches.length === 1)) e.preventDefault();
             }
 
             function stopDraw() { if (isDrawing) { isDrawing = false; ctx.closePath(); } }
