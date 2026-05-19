@@ -25,12 +25,16 @@
         .page-wrapper {
             position: relative; margin-bottom: 8px; background-color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); width: 100%;
+            -webkit-user-select: none; user-select: none;
         }
 
         .pdf-layer, .draw-layer { display: block; width: 100%; height: auto; }
         
-        /* GEMBOK DIHAPUS: touch-action: none sudah dihilangkan dari draw-layer! */
-        .draw-layer { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
+        /* iFrame Layer Optimization */
+        .draw-layer { 
+            position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; 
+            -webkit-user-select: none; user-select: none;
+        }
         
         body.tool-hand-active .draw-layer { pointer-events: none; }
 
@@ -229,20 +233,15 @@
                 loader.classList.remove('hidden');
 
                 try {
-                    const response = await fetch(externalPdfUrl);
-                    if (!response.ok) throw new Error('Gagal menarik file');
-                    
-                    const arrayBuffer = await response.arrayBuffer();
-                    const typedarray = new Uint8Array(arrayBuffer);
-                    
                     currentFileName = "Buku-Arka";
                     
-                    pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+                    // JURUS BARU: Langsung oper URL string ke PDF.js tanpa fetch manual biar bypass error
+                    pdfDoc = await pdfjsLib.getDocument(externalPdfUrl).promise;
                     pdfContainer.innerHTML = ''; activeCanvases = []; undoStack = [];
                     for (let i = 1; i <= pdfDoc.numPages; i++) await renderPage(i);
                     
                 } catch (err) {
-                    alert('Gagal memuat PDF dari Belajar Arka. Pastikan link Google Drive-nya berstatus "Siapa saja yang memiliki link" (Anyone with the link). Detail error: ' + err.message);
+                    alert('Gagal memuat PDF secara otomatis. \n\nPENTING: Pastikan link di database Excel/Google Sheet sudah diganti menjadi link GitHub (.github.io), BUKAN link Google Drive lagi.');
                     document.getElementById('btn-open-initial').style.display = 'flex'; 
                 }
                 loader.classList.add('hidden'); 
@@ -262,6 +261,13 @@
 
             pdfCanvas.width = viewport.width; pdfCanvas.height = viewport.height;
             drawCanvas.width = viewport.width; drawCanvas.height = viewport.height;
+
+            // Set proteksi awal touch-action berdasarkan tool aktif
+            if (currentTool === 'hand') {
+                drawCanvas.style.touchAction = 'auto';
+            } else {
+                drawCanvas.style.touchAction = 'none';
+            }
 
             await page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport: viewport }).promise;
 
@@ -303,7 +309,15 @@
 
         function showMenu(x, y) {
             menuVisible = true; floatingMenu.classList.remove('hidden');
-            const currentZoom = window.visualViewport ? window.visualViewport.scale : 1;
+            
+            // JURUS AMAN iFRAME: Abaikan visualViewport scale jika berada di dalam cangkang iframe
+            let currentZoom = 1;
+            try {
+                if (window.visualViewport && window.top === window.self) {
+                    currentZoom = window.visualViewport.scale || 1;
+                }
+            } catch(e) { currentZoom = 1; }
+
             floatingMenu.style.transform = `scale(${1 / currentZoom})`; floatingMenu.style.transformOrigin = 'top left';
 
             const scaledWidth = floatingMenu.offsetWidth * (1 / currentZoom);
@@ -325,6 +339,7 @@
         }, { passive: false });
         window.addEventListener('touchmove', () => clearTimeout(longPressTimer));
         window.addEventListener('touchend', () => clearTimeout(longPressTimer));
+        window.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
         window.addEventListener('contextmenu', (e) => { e.preventDefault(); if(!e.target.closest('.sig-overlay-box')) showMenu(e.clientX, e.clientY); });
 
         let storedSignature = null;
@@ -378,6 +393,16 @@
                 const activeBtn = document.getElementById(`btn-${tool}`);
                 if(activeBtn) activeBtn.classList.add('active');
             }
+
+            // JURUS AMAN iFRAME: Matikan paksa touch-action browser saat mencoret agar tidak direbut perintah scroll
+            document.querySelectorAll('.draw-layer').forEach(canvas => {
+                if (tool === 'hand') {
+                    canvas.style.touchAction = 'auto';
+                } else {
+                    canvas.style.touchAction = 'none';
+                }
+            });
+
             if (tool === 'hand') document.body.classList.add('tool-hand-active'); else document.body.classList.remove('tool-hand-active');
             if (tool !== 'signature_stamp') toastInstruction.classList.add('hidden');
         }
@@ -536,10 +561,10 @@
                 else return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
             }
 
+            // KUNCI iFRAME: Intersept pergerakan sentuhan agar mutlak dikuasai oleh kanvas
             function startDraw(e) {
                 if (menuVisible) return; 
 
-                // BYPASS MULTI-TOUCH: Jika terdeteksi 2 jari, batalkan coretan agar browser bisa Zoom/Scroll
                 if (e.touches && e.touches.length > 1) {
                     isDrawing = false;
                     return; 
@@ -547,7 +572,6 @@
 
                 if (currentTool === 'signature_stamp' && storedSignature) {
                     spawnSignatureOverlay(canvas, ctx, e); 
-                    // Tahan scroll untuk mouse biasa
                     if(!e.touches && e.cancelable) e.preventDefault(); 
                     return; 
                 }
@@ -558,12 +582,10 @@
                 const pos = getCoordinates(e); lastX = pos.x; lastY = pos.y;
                 ctx.beginPath(); ctx.moveTo(lastX, lastY); 
                 
-                // JANGAN panggil e.preventDefault() di touchstart untuk layar sentuh, agar jari kedua tetap bisa mendeteksi zoom!
-                if(!e.touches && e.cancelable) e.preventDefault(); 
+                if(e.cancelable && e.touches && e.touches.length === 1) e.preventDefault(); 
             }
 
             function draw(e) {
-                // BYPASS MULTI-TOUCH: Jika jari kedua menempel di tengah coretan, langsung putus garisnya!
                 if (e.touches && e.touches.length > 1) {
                     isDrawing = false; 
                     return; 
@@ -571,7 +593,6 @@
 
                 if (!isDrawing || currentTool === 'hand' || currentTool === 'signature_stamp') return;
                 
-                // KUNCI PENTING: Panggil preventDefault HANYA saat 1 jari bergerak mencoret untuk menahan layar
                 if(e.cancelable && e.touches && e.touches.length === 1) e.preventDefault();
 
                 const pos = getCoordinates(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
