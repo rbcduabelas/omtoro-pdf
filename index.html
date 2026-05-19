@@ -218,6 +218,37 @@
         document.getElementById('file-upload-initial').addEventListener('change', (e) => loadDocument(e.target.files[0]));
         document.getElementById('file-upload-menu').addEventListener('change', (e) => loadDocument(e.target.files[0]));
 
+        // --- JURUS PENYAMBUT TAMU DARI BELAJAR ARKA ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const externalPdfUrl = urlParams.get('buka');
+
+            if (externalPdfUrl) {
+                document.getElementById('btn-open-initial').style.display = 'none';
+                loader.textContent = 'Mengunduh Buku dari Arka Belajar... ⏳'; 
+                loader.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(externalPdfUrl);
+                    if (!response.ok) throw new Error('Gagal menarik file');
+                    
+                    const arrayBuffer = await response.arrayBuffer();
+                    const typedarray = new Uint8Array(arrayBuffer);
+                    
+                    currentFileName = "Buku-Arka";
+                    
+                    pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+                    pdfContainer.innerHTML = ''; activeCanvases = []; undoStack = [];
+                    for (let i = 1; i <= pdfDoc.numPages; i++) await renderPage(i);
+                    
+                } catch (err) {
+                    alert('Gagal memuat PDF dari Belajar Arka. Pastikan link Google Drive-nya berstatus "Siapa saja yang memiliki link" (Anyone with the link). Detail error: ' + err.message);
+                    document.getElementById('btn-open-initial').style.display = 'flex'; 
+                }
+                loader.classList.add('hidden'); 
+            }
+        });
+
         async function renderPage(num) {
             const page = await pdfDoc.getPage(num);
             const containerWidth = window.innerWidth;
