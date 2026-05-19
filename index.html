@@ -25,12 +25,17 @@
         .page-wrapper {
             position: relative; margin-bottom: 8px; background-color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); width: 100%;
+            -webkit-user-select: none; user-select: none;
         }
 
         .pdf-layer, .draw-layer { display: block; width: 100%; height: auto; }
         
-        /* Gembok touch-action sudah dibuang agar multi-touch 2 jari hidup kembali! */
-        .draw-layer { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
+        /* JURUS AJAIB: Hanya matikan 1 jari, biarkan 2 jari bebas zoom/scroll! */
+        .draw-layer { 
+            position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; 
+            touch-action: pinch-zoom; 
+            -webkit-user-select: none; user-select: none;
+        }
         
         body.tool-hand-active .draw-layer { pointer-events: none; }
 
@@ -212,7 +217,6 @@
         document.getElementById('file-upload-initial').addEventListener('change', (e) => loadDocument(e.target.files[0]));
         document.getElementById('file-upload-menu').addEventListener('change', (e) => loadDocument(e.target.files[0]));
 
-        // --- BUKA PDF DARI LINK ARKA BELAJAR ---
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const externalPdfUrl = urlParams.get('buka');
@@ -306,7 +310,6 @@
 
         function closeMenu() { floatingMenu.classList.add('hidden'); menuVisible = false; }
 
-        // Tambahan stopPropagation agar klik lama tidak bocor ke iFrame
         window.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1 && !floatingMenu.contains(e.target) && !document.getElementById('signature-modal').contains(e.target) && !e.target.closest('.sig-overlay-box')) {
                 longPressTimer = setTimeout(() => { showMenu(e.touches[0].clientX, e.touches[0].clientY); }, 500);
@@ -368,6 +371,7 @@
                 const activeBtn = document.getElementById(`btn-${tool}`);
                 if(activeBtn) activeBtn.classList.add('active');
             }
+
             if (tool === 'hand') document.body.classList.add('tool-hand-active'); else document.body.classList.remove('tool-hand-active');
             if (tool !== 'signature_stamp') toastInstruction.classList.add('hidden');
         }
@@ -507,7 +511,7 @@
             img.src = storedSignature;
         }
 
-        // --- LOGIKA MENGGAMBAR DENGAN BYPASS MULTI-TOUCH ---
+        // --- LOGIKA MENGGAMBAR (DIPERBAIKI UNTUK MULTI-TOUCH) ---
         let isDrawing = false; let lastX = 0; let lastY = 0; let undoStack = []; 
 
         function saveState(canvas, ctx) {
@@ -529,7 +533,7 @@
             function startDraw(e) {
                 if (menuVisible) return; 
 
-                // BYPASS: Kalau 2 jari, langsung batalkan coretan agar browser bebas Scroll/Zoom
+                // Jika terdeteksi 2 jari, biarkan browser yang mengurus zoom/scroll
                 if (e.touches && e.touches.length > 1) {
                     isDrawing = false;
                     return; 
@@ -547,10 +551,9 @@
                 const pos = getCoordinates(e); lastX = pos.x; lastY = pos.y;
                 ctx.beginPath(); ctx.moveTo(lastX, lastY); 
                 
-                // JURUS iFRAME: Tahan scroll browser DAN hentikan kebocoran sentuhan ke aplikasi Arka
-                if(e.cancelable && e.touches && e.touches.length === 1) {
+                // PENTING: JANGAN panggil e.preventDefault() di sini saat menggunakan sentuhan jari!
+                if(!e.touches && e.cancelable) {
                     e.preventDefault(); 
-                    e.stopPropagation(); 
                 }
             }
 
@@ -562,9 +565,10 @@
 
                 if (!isDrawing || currentTool === 'hand' || currentTool === 'signature_stamp') return;
                 
+                // Hentikan kebocoran dan kunci scroll HANYA saat 1 jari sudah bergerak nyata
                 if(e.cancelable && e.touches && e.touches.length === 1) {
                     e.preventDefault();
-                    e.stopPropagation(); // Mencegah bocor saat sedang tarik garis
+                    e.stopPropagation(); 
                 }
 
                 const pos = getCoordinates(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
