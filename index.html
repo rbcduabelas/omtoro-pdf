@@ -17,7 +17,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0; background-color: #e9ecef;
             overflow-x: hidden; 
-            overscroll-behavior-y: none; /* JURUS ANTI PULL-TO-REFRESH */
+            overscroll-behavior-y: none; /* Anti Pull-to-Refresh */
             -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
 
@@ -54,43 +54,44 @@
             width: 40px; height: 40px; border-radius: 50%;
             background-color: transparent; color: #333; border: none;
             font-size: 28px; font-weight: bold; box-shadow: none;
-            text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.8); /* Glow putih agar selalu terbaca */
+            text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.8);
             cursor: pointer; display: flex; justify-content: center; align-items: center;
             transition: transform 0.2s;
         }
         #menu-toggle-btn:active { transform: scale(0.85); }
 
-        /* --- MENU 2 KOLOM (DIRAMPINGKAN) --- */
+        /* --- MENU 2 KOLOM EXTRA RAMPING --- */
         #floating-menu {
             position: fixed; top: 50px; right: 15px; background-color: #ffffff;
-            padding: 8px; border-radius: 10px;
+            padding: 6px; border-radius: 10px; /* Padding dikecilkan */
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; /* Gap dipersempit */
             border: 2px solid #00bcd4; width: max-content;
             transform-origin: top right;
         }
         .hidden { display: none !important; }
 
+        /* Ukuran tombol diubah jadi serba kotak kecil */
         .btn-icon, .btn-upload-label {
-            width: 34px; height: 34px; min-height: 34px; padding: 0; 
+            width: 32px; height: 32px; min-height: 32px; padding: 0; 
             border: 1px solid #ddd; border-radius: 6px;
             cursor: pointer; background: white; font-size: 16px; 
             display: flex; justify-content: center; align-items: center; flex-shrink: 0;
-            margin: auto;
         }
-        .btn-upload-label { background: #f1f8e9; }
+        .btn-upload-label { background: #f1f8e9; font-size: 14px; }
         .btn-icon.active { background-color: #e0f7fa; border-color: #00bcd4; box-shadow: inset 0 0 5px rgba(0,188,212,0.3); }
 
-        .menu-row-full {
-            grid-column: span 2; display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%;
-        }
-
         input[type="color"] { 
-            width: 34px; height: 30px; min-height: 30px; 
+            width: 32px; height: 32px; min-height: 32px; 
             border: none; border-radius: 6px; cursor: pointer; padding: 0; flex-shrink: 0;
         }
+        
+        .menu-row-full {
+            grid-column: span 2; width: 100%; display: flex; justify-content: center;
+        }
+        
         input[type="range"] {
-            width: 100%; height: 20px; cursor: pointer;
+            width: 100%; height: 20px; cursor: pointer; margin: 4px 0;
         }
 
         .divider { grid-column: span 2; width: 100%; height: 2px; background-color: #eee; border-radius: 2px; margin: 0; }
@@ -164,31 +165,27 @@
         <input type="file" id="file-upload-initial" accept="application/pdf">
     </label>
 
-    <!-- TOMBOL TITIK TIGA BARU TRANSPARAN -->
+    <!-- TOMBOL TITIK TIGA TRANSPARAN -->
     <button id="menu-toggle-btn" onclick="toggleMenu()" title="Buka Menu">⋮</button>
 
-    <!-- MENU 2 KOLOM (DIRAMPINGKAN) -->
+    <!-- MENU 2 KOLOM EXTRA RAMPING (Hanya Icon) -->
     <div id="floating-menu" class="hidden">
         <button id="btn-hand" class="btn-icon active" onclick="setTool('hand')" title="Geser Layar">✋</button>
+        <button class="btn-icon" onclick="undo()" title="Batal (Undo)">↩️</button>
+
         <button id="btn-pen" class="btn-icon" onclick="setTool('pen')" title="Pensil">✏️</button>
+        <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
         
         <button id="btn-brush" class="btn-icon" onclick="setTool('brush')" title="Kuas">🖌️</button>
         <button id="btn-highlighter" class="btn-icon" onclick="setTool('highlighter')" title="Stabilo">🖍️</button>
         
-        <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
-        <button class="btn-icon" onclick="undo()" title="Batal (Undo)">↩️</button>
-        
         <div class="divider"></div>
         
-        <div class="menu-row-full">
-            <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
-            <input type="range" id="size-slider" min="1" max="50" value="5" title="Ketebalan">
-        </div>
+        <!-- Baris Warna dan Tanda Tangan disejajarkan -->
+        <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
+        <button class="btn-icon" style="background-color: #fff9c4;" onclick="openSignatureModal()" title="Buat Tanda Tangan">✍️</button>
         
-        <div class="divider"></div>
-        
-        <!-- Ukuran font dan padding dirampingkan -->
-        <button class="btn-icon menu-row-full" style="background-color: #fff9c4; width: auto; padding: 4px 8px; font-size: 13px;" onclick="openSignatureModal()" title="Buat Tanda Tangan">✍️ Tanda Tangan</button>
+        <input type="range" id="size-slider" class="menu-row-full" min="1" max="50" value="5" title="Ketebalan">
         
         <div class="divider"></div>
         
