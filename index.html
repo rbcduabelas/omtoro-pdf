@@ -17,6 +17,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0; background-color: #e9ecef;
             overflow-x: hidden; 
+            overscroll-behavior-y: none; /* JURUS ANTI PULL-TO-REFRESH */
             -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
 
@@ -30,7 +31,6 @@
 
         .pdf-layer, .draw-layer { display: block; width: 100%; height: auto; }
         
-        /* JURUS AJAIB: Hanya matikan 1 jari, biarkan 2 jari bebas zoom/scroll! */
         .draw-layer { 
             position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; 
             touch-action: pinch-zoom; 
@@ -48,36 +48,52 @@
         }
         input[type="file"] { display: none; }
 
-        #floating-menu {
-            position: fixed; background-color: #ffffff;
-            padding: 6px 4px; border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
-            display: flex; flex-direction: column; align-items: center; gap: 4px; 
-            border: 2px solid #00bcd4; width: 36px;
-            max-height: 60vh; overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none;
+        /* --- TOMBOL TITIK TIGA DI POJOK KANAN ATAS --- */
+        #menu-toggle-btn {
+            position: fixed; top: 15px; right: 15px; z-index: 1001;
+            width: 45px; height: 45px; border-radius: 50%;
+            background-color: #00bcd4; color: white; border: none;
+            font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: background-color 0.2s;
         }
-        #floating-menu::-webkit-scrollbar { display: none; }
+        #menu-toggle-btn:active { background-color: #0097a7; }
+
+        /* --- MENU 2 KOLOM --- */
+        #floating-menu {
+            position: fixed; top: 70px; right: 15px; background-color: #ffffff;
+            padding: 12px; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1000;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; 
+            border: 2px solid #00bcd4; width: max-content;
+            transform-origin: top right;
+        }
         .hidden { display: none !important; }
 
         .btn-icon, .btn-upload-label {
-            width: 30px; height: 30px; min-height: 30px; padding: 0; 
+            width: 40px; height: 40px; min-height: 40px; padding: 0; 
             border: 1px solid #ddd; border-radius: 8px;
-            cursor: pointer; background: white; font-size: 15px; 
+            cursor: pointer; background: white; font-size: 18px; 
             display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+            margin: auto;
         }
         .btn-upload-label { background: #f1f8e9; }
         .btn-icon.active { background-color: #e0f7fa; border-color: #00bcd4; box-shadow: inset 0 0 5px rgba(0,188,212,0.3); }
 
-        input[type="color"] { 
-            width: 30px; height: 30px; min-height: 30px; 
-            border: none; border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;
-        }
-        input[type="range"] {
-            -webkit-appearance: slider-vertical; writing-mode: vertical-lr; direction: rtl;
-            width: 12px; height: 50px; min-height: 50px; margin: 2px 0; cursor: ns-resize; flex-shrink: 0;
+        .menu-row-full {
+            grid-column: span 2; display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;
         }
 
-        .divider { width: 80%; height: 2px; background-color: #eee; border-radius: 2px; margin: 2px 0; flex-shrink: 0; }
+        input[type="color"] { 
+            width: 40px; height: 35px; min-height: 35px; 
+            border: none; border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;
+        }
+        /* Slider diubah jadi horizontal agar pas di grid */
+        input[type="range"] {
+            width: 100%; height: 20px; cursor: pointer;
+        }
+
+        .divider { grid-column: span 2; width: 100%; height: 2px; background-color: #eee; border-radius: 2px; margin: 2px 0; }
 
         #loader {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -148,24 +164,37 @@
         <input type="file" id="file-upload-initial" accept="application/pdf">
     </label>
 
+    <!-- TOMBOL TITIK TIGA BARU -->
+    <button id="menu-toggle-btn" onclick="toggleMenu()" title="Buka Menu">⋮</button>
+
+    <!-- MENU 2 KOLOM -->
     <div id="floating-menu" class="hidden">
         <button id="btn-hand" class="btn-icon active" onclick="setTool('hand')" title="Geser Layar">✋</button>
         <button id="btn-pen" class="btn-icon" onclick="setTool('pen')" title="Pensil">✏️</button>
+        
         <button id="btn-brush" class="btn-icon" onclick="setTool('brush')" title="Kuas">🖌️</button>
         <button id="btn-highlighter" class="btn-icon" onclick="setTool('highlighter')" title="Stabilo">🖍️</button>
+        
         <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
-        <div class="divider"></div>
-        <button class="btn-icon" onclick="openSignatureModal()" style="background-color: #fff9c4;" title="Buat Tanda Tangan">✍️</button>
-        <div class="divider"></div>
-        <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
-        <input type="range" id="size-slider" min="1" max="50" value="5" title="Ketebalan">
         <button class="btn-icon" onclick="undo()" title="Batal (Undo)">↩️</button>
+        
         <div class="divider"></div>
+        
+        <div class="menu-row-full">
+            <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
+            <input type="range" id="size-slider" min="1" max="50" value="5" title="Ketebalan">
+        </div>
+        
+        <div class="divider"></div>
+        
+        <button class="btn-icon menu-row-full" style="background-color: #fff9c4; width: auto; padding: 0 10px;" onclick="openSignatureModal()" title="Buat Tanda Tangan">✍️ Tanda Tangan</button>
+        
+        <div class="divider"></div>
+        
         <label class="btn-upload-label" title="Buka File Lain">
             📂<input type="file" id="file-upload-menu" accept="application/pdf">
         </label>
         <button class="btn-icon" style="background-color: #e3f2fd;" onclick="savePDF()" title="Simpan sebagai PDF Baru">💾</button>
-        <button class="btn-icon" style="color: red; border-color: red;" onclick="closeMenu()" title="Tutup Menu">✖</button>
     </div>
 
     <div id="signature-modal" class="hidden">
@@ -288,37 +317,37 @@
             pdf.save(`${currentFileName}-Terselesaikan.pdf`); loader.classList.add('hidden');
         }
 
+        // --- LOGIKA MENU BARU ---
         const floatingMenu = document.getElementById('floating-menu');
-        let longPressTimer; let menuVisible = false;
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        let menuVisible = false;
 
-        function showMenu(x, y) {
-            menuVisible = true; floatingMenu.classList.remove('hidden');
-            let currentZoom = 1;
-            try { if (window.visualViewport && window.top === window.self) currentZoom = window.visualViewport.scale || 1; } catch(e) {}
-
-            floatingMenu.style.transform = `scale(${1 / currentZoom})`; floatingMenu.style.transformOrigin = 'top left';
-
-            const scaledWidth = floatingMenu.offsetWidth * (1 / currentZoom);
-            const scaledHeight = floatingMenu.offsetHeight * (1 / currentZoom);
-            let finalX = x; let finalY = y;
-            if (x + scaledWidth > window.innerWidth) finalX = window.innerWidth - scaledWidth - 10;
-            if (y + scaledHeight > window.innerHeight) finalY = window.innerHeight - scaledHeight - 10;
-
-            floatingMenu.style.left = finalX + 'px'; floatingMenu.style.top = finalY + 'px';
-            navigator.vibrate && navigator.vibrate(50); 
+        function toggleMenu() {
+            if (floatingMenu.classList.contains('hidden')) {
+                floatingMenu.classList.remove('hidden');
+                menuVisible = true;
+            } else {
+                closeMenu();
+            }
         }
 
-        function closeMenu() { floatingMenu.classList.add('hidden'); menuVisible = false; }
+        function closeMenu() { 
+            floatingMenu.classList.add('hidden'); 
+            menuVisible = false; 
+        }
 
-        window.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1 && !floatingMenu.contains(e.target) && !document.getElementById('signature-modal').contains(e.target) && !e.target.closest('.sig-overlay-box')) {
-                longPressTimer = setTimeout(() => { showMenu(e.touches[0].clientX, e.touches[0].clientY); }, 500);
+        // Tutup menu kalau area di luar menu di-klik/di-tap
+        document.addEventListener('touchstart', (e) => {
+            if (!floatingMenu.classList.contains('hidden') && !floatingMenu.contains(e.target) && e.target !== menuToggleBtn) {
+                closeMenu();
             }
-        }, { passive: false });
-        window.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-        window.addEventListener('touchend', () => clearTimeout(longPressTimer));
-        window.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
-        window.addEventListener('contextmenu', (e) => { e.preventDefault(); if(!e.target.closest('.sig-overlay-box')) showMenu(e.clientX, e.clientY); });
+        }, { passive: true });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!floatingMenu.classList.contains('hidden') && !floatingMenu.contains(e.target) && e.target !== menuToggleBtn) {
+                closeMenu();
+            }
+        });
 
         let storedSignature = null;
         const sigModal = document.getElementById('signature-modal');
@@ -511,7 +540,6 @@
             img.src = storedSignature;
         }
 
-        // --- LOGIKA MENGGAMBAR (DIPERBAIKI UNTUK MULTI-TOUCH) ---
         let isDrawing = false; let lastX = 0; let lastY = 0; let undoStack = []; 
 
         function saveState(canvas, ctx) {
@@ -533,7 +561,6 @@
             function startDraw(e) {
                 if (menuVisible) return; 
 
-                // Jika terdeteksi 2 jari, biarkan browser yang mengurus zoom/scroll
                 if (e.touches && e.touches.length > 1) {
                     isDrawing = false;
                     return; 
@@ -551,7 +578,6 @@
                 const pos = getCoordinates(e); lastX = pos.x; lastY = pos.y;
                 ctx.beginPath(); ctx.moveTo(lastX, lastY); 
                 
-                // PENTING: JANGAN panggil e.preventDefault() di sini saat menggunakan sentuhan jari!
                 if(!e.touches && e.cancelable) {
                     e.preventDefault(); 
                 }
@@ -565,7 +591,6 @@
 
                 if (!isDrawing || currentTool === 'hand' || currentTool === 'signature_stamp') return;
                 
-                // Hentikan kebocoran dan kunci scroll HANYA saat 1 jari sudah bergerak nyata
                 if(e.cancelable && e.touches && e.touches.length === 1) {
                     e.preventDefault();
                     e.stopPropagation(); 
