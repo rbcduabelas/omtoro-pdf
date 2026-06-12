@@ -48,32 +48,33 @@
         }
         input[type="file"] { display: none; }
 
-        /* --- TOMBOL TITIK TIGA DI POJOK KANAN ATAS --- */
+        /* --- TOMBOL TITIK TIGA TRANSPARAN --- */
         #menu-toggle-btn {
-            position: fixed; top: 15px; right: 15px; z-index: 1001;
-            width: 45px; height: 45px; border-radius: 50%;
-            background-color: #00bcd4; color: white; border: none;
-            font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: fixed; top: 10px; right: 10px; z-index: 1001;
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: transparent; color: #333; border: none;
+            font-size: 28px; font-weight: bold; box-shadow: none;
+            text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.8); /* Glow putih agar selalu terbaca */
             cursor: pointer; display: flex; justify-content: center; align-items: center;
-            transition: background-color 0.2s;
+            transition: transform 0.2s;
         }
-        #menu-toggle-btn:active { background-color: #0097a7; }
+        #menu-toggle-btn:active { transform: scale(0.85); }
 
-        /* --- MENU 2 KOLOM --- */
+        /* --- MENU 2 KOLOM (DIRAMPINGKAN) --- */
         #floating-menu {
-            position: fixed; top: 70px; right: 15px; background-color: #ffffff;
-            padding: 12px; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1000;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; 
+            position: fixed; top: 50px; right: 15px; background-color: #ffffff;
+            padding: 8px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
             border: 2px solid #00bcd4; width: max-content;
             transform-origin: top right;
         }
         .hidden { display: none !important; }
 
         .btn-icon, .btn-upload-label {
-            width: 40px; height: 40px; min-height: 40px; padding: 0; 
-            border: 1px solid #ddd; border-radius: 8px;
-            cursor: pointer; background: white; font-size: 18px; 
+            width: 34px; height: 34px; min-height: 34px; padding: 0; 
+            border: 1px solid #ddd; border-radius: 6px;
+            cursor: pointer; background: white; font-size: 16px; 
             display: flex; justify-content: center; align-items: center; flex-shrink: 0;
             margin: auto;
         }
@@ -81,19 +82,18 @@
         .btn-icon.active { background-color: #e0f7fa; border-color: #00bcd4; box-shadow: inset 0 0 5px rgba(0,188,212,0.3); }
 
         .menu-row-full {
-            grid-column: span 2; display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;
+            grid-column: span 2; display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%;
         }
 
         input[type="color"] { 
-            width: 40px; height: 35px; min-height: 35px; 
-            border: none; border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;
+            width: 34px; height: 30px; min-height: 30px; 
+            border: none; border-radius: 6px; cursor: pointer; padding: 0; flex-shrink: 0;
         }
-        /* Slider diubah jadi horizontal agar pas di grid */
         input[type="range"] {
             width: 100%; height: 20px; cursor: pointer;
         }
 
-        .divider { grid-column: span 2; width: 100%; height: 2px; background-color: #eee; border-radius: 2px; margin: 2px 0; }
+        .divider { grid-column: span 2; width: 100%; height: 2px; background-color: #eee; border-radius: 2px; margin: 0; }
 
         #loader {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -164,10 +164,10 @@
         <input type="file" id="file-upload-initial" accept="application/pdf">
     </label>
 
-    <!-- TOMBOL TITIK TIGA BARU -->
+    <!-- TOMBOL TITIK TIGA BARU TRANSPARAN -->
     <button id="menu-toggle-btn" onclick="toggleMenu()" title="Buka Menu">⋮</button>
 
-    <!-- MENU 2 KOLOM -->
+    <!-- MENU 2 KOLOM (DIRAMPINGKAN) -->
     <div id="floating-menu" class="hidden">
         <button id="btn-hand" class="btn-icon active" onclick="setTool('hand')" title="Geser Layar">✋</button>
         <button id="btn-pen" class="btn-icon" onclick="setTool('pen')" title="Pensil">✏️</button>
@@ -187,7 +187,8 @@
         
         <div class="divider"></div>
         
-        <button class="btn-icon menu-row-full" style="background-color: #fff9c4; width: auto; padding: 0 10px;" onclick="openSignatureModal()" title="Buat Tanda Tangan">✍️ Tanda Tangan</button>
+        <!-- Ukuran font dan padding dirampingkan -->
+        <button class="btn-icon menu-row-full" style="background-color: #fff9c4; width: auto; padding: 4px 8px; font-size: 13px;" onclick="openSignatureModal()" title="Buat Tanda Tangan">✍️ Tanda Tangan</button>
         
         <div class="divider"></div>
         
@@ -317,7 +318,6 @@
             pdf.save(`${currentFileName}-Terselesaikan.pdf`); loader.classList.add('hidden');
         }
 
-        // --- LOGIKA MENU BARU ---
         const floatingMenu = document.getElementById('floating-menu');
         const menuToggleBtn = document.getElementById('menu-toggle-btn');
         let menuVisible = false;
@@ -336,7 +336,6 @@
             menuVisible = false; 
         }
 
-        // Tutup menu kalau area di luar menu di-klik/di-tap
         document.addEventListener('touchstart', (e) => {
             if (!floatingMenu.classList.contains('hidden') && !floatingMenu.contains(e.target) && e.target !== menuToggleBtn) {
                 closeMenu();
