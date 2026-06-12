@@ -1,4 +1,4 @@
-const CACHE_NAME = 'omtoro-pdf-v10';
+const CACHE_NAME = 'omtoro-pdf-v11';
 
 const urlsToCache = [
     './',
