@@ -48,25 +48,29 @@
         }
         input[type="file"] { display: none; }
 
-        /* PERBAIKAN: Tombol Titik Tiga dibuat lebih terlihat (tidak transparan total) */
+        /* PERBAIKAN: Tombol Titik Tiga Kiri Atas & Transparan */
         #menu-toggle-btn {
-            position: fixed; top: 10px; right: 10px; z-index: 1001;
-            width: 45px; height: 45px; border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.9); color: #004080; border: 2px solid #004080;
-            font-size: 24px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: fixed; top: 10px; left: 10px; /* Pindah ke kiri */
+            z-index: 1001; width: 40px; height: 40px; border-radius: 50%;
+            background-color: transparent; color: #333; border: none; /* Transparan */
+            font-size: 28px; font-weight: bold; box-shadow: none;
+            /* Tambahan text-shadow agar titik tiga tetap terlihat walau PDF berwarna gelap */
+            text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.8);
             cursor: pointer; display: flex; justify-content: center; align-items: center;
             transition: transform 0.2s;
         }
         #menu-toggle-btn:active { transform: scale(0.85); }
 
+        /* PERBAIKAN: Menu alat disesuaikan agar muncul dari kiri */
         #floating-menu {
-            position: fixed; top: 65px; right: 15px; background-color: #ffffff;
-            padding: 6px; border-radius: 10px; 
+            position: fixed; top: 50px; left: 15px; /* Pindah ke kiri */
+            background-color: #ffffff; padding: 6px; border-radius: 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
             display: grid; grid-template-columns: 1fr 1fr; gap: 6px; 
             border: 2px solid #00bcd4; width: max-content;
-            transform-origin: top right;
+            transform-origin: top left; /* Animasi buka dari kiri atas */
         }
+        
         .hidden { display: none !important; }
 
         .btn-icon, .btn-upload-label {
@@ -93,7 +97,6 @@
             border-radius: 8px; z-index: 2000; font-weight: bold; font-size: 14px; text-align: center;
         }
 
-        /* --- SISA CSS MODAL SIGNATURE TETAP SAMA --- */
         #signature-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; }
         .sig-container { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
         .btn-upload-sig { display: inline-block; width: 100%; box-sizing: border-box; margin-bottom: 5px; padding: 8px 15px; background: #e3f2fd; color: #004080; border: 1px dashed #004080; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: background 0.2s; }
@@ -196,7 +199,6 @@
         document.getElementById('file-upload-initial').addEventListener('change', (e) => loadDocument(e.target.files[0]));
         document.getElementById('file-upload-menu').addEventListener('change', (e) => loadDocument(e.target.files[0]));
 
-        // PERBAIKAN: Logika saat memuat PDF dari URL GitHub
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const externalPdfUrl = urlParams.get('buka');
@@ -212,8 +214,7 @@
                     pdfContainer.innerHTML = ''; activeCanvases = []; undoStack = [];
                     for (let i = 1; i <= pdfDoc.numPages; i++) await renderPage(i);
                     
-                    // OTOMATIS BUKA MENU SAAT PDF SELESAI DIMUAT
-                    toggleMenu();
+                    toggleMenu(); // Menu otomatis terbuka
 
                 } catch (err) {
                     console.error("Detail Error PDF.js:", err);
@@ -303,7 +304,6 @@
             }
         });
 
-        // --- SISA SCRIPT CANVAS DAN GAMBAR TETAP SAMA ---
         let storedSignature = null;
         const sigModal = document.getElementById('signature-modal');
         const sigCanvas = document.getElementById('signature-canvas');
