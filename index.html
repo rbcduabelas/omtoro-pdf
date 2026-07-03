@@ -17,7 +17,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0; background-color: #e9ecef;
             overflow-x: hidden; 
-            overscroll-behavior-y: none; /* Anti Pull-to-Refresh */
+            overscroll-behavior-y: none; 
             -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
 
@@ -48,30 +48,27 @@
         }
         input[type="file"] { display: none; }
 
-        /* --- TOMBOL TITIK TIGA TRANSPARAN --- */
+        /* PERBAIKAN: Tombol Titik Tiga dibuat lebih terlihat (tidak transparan total) */
         #menu-toggle-btn {
             position: fixed; top: 10px; right: 10px; z-index: 1001;
-            width: 40px; height: 40px; border-radius: 50%;
-            background-color: transparent; color: #333; border: none;
-            font-size: 28px; font-weight: bold; box-shadow: none;
-            text-shadow: 0 0 5px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.8);
+            width: 45px; height: 45px; border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9); color: #004080; border: 2px solid #004080;
+            font-size: 24px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             cursor: pointer; display: flex; justify-content: center; align-items: center;
             transition: transform 0.2s;
         }
         #menu-toggle-btn:active { transform: scale(0.85); }
 
-        /* --- MENU 2 KOLOM EXTRA RAMPING --- */
         #floating-menu {
-            position: fixed; top: 50px; right: 15px; background-color: #ffffff;
-            padding: 6px; border-radius: 10px; /* Padding dikecilkan */
+            position: fixed; top: 65px; right: 15px; background-color: #ffffff;
+            padding: 6px; border-radius: 10px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; /* Gap dipersempit */
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; 
             border: 2px solid #00bcd4; width: max-content;
             transform-origin: top right;
         }
         .hidden { display: none !important; }
 
-        /* Ukuran tombol diubah jadi serba kotak kecil */
         .btn-icon, .btn-upload-label {
             width: 32px; height: 32px; min-height: 32px; padding: 0; 
             border: 1px solid #ddd; border-radius: 6px;
@@ -86,71 +83,31 @@
             border: none; border-radius: 6px; cursor: pointer; padding: 0; flex-shrink: 0;
         }
         
-        .menu-row-full {
-            grid-column: span 2; width: 100%; display: flex; justify-content: center;
-        }
-        
-        input[type="range"] {
-            width: 100%; height: 20px; cursor: pointer; margin: 4px 0;
-        }
-
+        .menu-row-full { grid-column: span 2; width: 100%; display: flex; justify-content: center; }
+        input[type="range"] { width: 100%; height: 20px; cursor: pointer; margin: 4px 0; }
         .divider { grid-column: span 2; width: 100%; height: 2px; background-color: #eee; border-radius: 2px; margin: 0; }
 
         #loader {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.8); color: white; padding: 15px 25px;
-            border-radius: 8px; z-index: 2000; font-weight: bold; font-size: 14px;
+            border-radius: 8px; z-index: 2000; font-weight: bold; font-size: 14px; text-align: center;
         }
 
-        #signature-modal {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6); z-index: 3000;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .sig-container {
-            background: white; padding: 15px; border-radius: 10px; text-align: center; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center;
-        }
-        .btn-upload-sig {
-            display: inline-block; width: 100%; box-sizing: border-box; margin-bottom: 5px; padding: 8px 15px;
-            background: #e3f2fd; color: #004080; border: 1px dashed #004080; border-radius: 6px;
-            cursor: pointer; font-weight: bold; font-size: 13px; transition: background 0.2s;
-        }
+        /* --- SISA CSS MODAL SIGNATURE TETAP SAMA --- */
+        #signature-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; }
+        .sig-container { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .btn-upload-sig { display: inline-block; width: 100%; box-sizing: border-box; margin-bottom: 5px; padding: 8px 15px; background: #e3f2fd; color: #004080; border: 1px dashed #004080; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: background 0.2s; }
         .btn-upload-sig:active { background: #bbdefb; }
         .btn-upload-sig input { display: none; }
-        
-        #signature-canvas {
-            border: 2px dashed #00bcd4; border-radius: 8px; background: #fdfdfd; 
-            cursor: crosshair; touch-action: none; margin-bottom: 15px;
-        }
+        #signature-canvas { border: 2px dashed #00bcd4; border-radius: 8px; background: #fdfdfd; cursor: crosshair; touch-action: none; margin-bottom: 15px; }
         .sig-buttons { display: flex; justify-content: space-between; gap: 10px; width: 100%; }
         .sig-buttons button { flex: 1; padding: 10px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
-        
-        #toast-instruction {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: #ffcc00; color: #000; padding: 10px 20px;
-            border-radius: 20px; font-weight: bold; z-index: 2000; pointer-events: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .sig-overlay-box {
-            position: absolute; border: 2px dashed #00bcd4; background: rgba(0, 188, 212, 0.1);
-            z-index: 2500; display: flex; align-items: center; justify-content: center;
-            touch-action: none; cursor: move;
-        }
+        #toast-instruction { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ffcc00; color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 2000; pointer-events: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .sig-overlay-box { position: absolute; border: 2px dashed #00bcd4; background: rgba(0, 188, 212, 0.1); z-index: 2500; display: flex; align-items: center; justify-content: center; touch-action: none; cursor: move; }
         .sig-overlay-img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-        .sig-overlay-handle {
-            position: absolute; bottom: -12px; right: -12px; width: 26px; height: 26px;
-            background: #00bcd4; color: white; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 16px; font-weight: bold;
-            cursor: se-resize; box-shadow: 0 2px 5px rgba(0,0,0,0.3); touch-action: none;
-        }
+        .sig-overlay-handle { position: absolute; bottom: -12px; right: -12px; width: 26px; height: 26px; background: #00bcd4; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; cursor: se-resize; box-shadow: 0 2px 5px rgba(0,0,0,0.3); touch-action: none; }
         .sig-overlay-controls { position: absolute; top: -45px; right: -30px; display: flex; gap: 8px; }
-        .sig-overlay-controls button {
-            background: white; border: 1px solid #ccc; border-radius: 50%; width: 34px; height: 34px;
-            cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            display: flex; justify-content: center; align-items: center; padding: 0;
-        }
+        .sig-overlay-controls button { background: white; border: 1px solid #ccc; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; padding: 0; }
     </style>
 </head>
 <body class="tool-hand-active">
@@ -165,23 +122,18 @@
         <input type="file" id="file-upload-initial" accept="application/pdf">
     </label>
 
-    <!-- TOMBOL TITIK TIGA TRANSPARAN -->
     <button id="menu-toggle-btn" onclick="toggleMenu()" title="Buka Menu">⋮</button>
 
-    <!-- MENU 2 KOLOM EXTRA RAMPING (Hanya Icon) -->
     <div id="floating-menu" class="hidden">
         <button id="btn-hand" class="btn-icon active" onclick="setTool('hand')" title="Geser Layar">✋</button>
         <button class="btn-icon" onclick="undo()" title="Batal (Undo)">↩️</button>
-
         <button id="btn-pen" class="btn-icon" onclick="setTool('pen')" title="Pensil">✏️</button>
         <button id="btn-eraser" class="btn-icon" onclick="setTool('eraser')" title="Penghapus">🧽</button>
-        
         <button id="btn-brush" class="btn-icon" onclick="setTool('brush')" title="Kuas">🖌️</button>
         <button id="btn-highlighter" class="btn-icon" onclick="setTool('highlighter')" title="Stabilo">🖍️</button>
         
         <div class="divider"></div>
         
-        <!-- Baris Warna dan Tanda Tangan disejajarkan -->
         <input type="color" id="color-picker" value="#000000" title="Pilih Warna">
         <button class="btn-icon" style="background-color: #fff9c4;" onclick="openSignatureModal()" title="Buat Tanda Tangan">✍️</button>
         
@@ -244,13 +196,14 @@
         document.getElementById('file-upload-initial').addEventListener('change', (e) => loadDocument(e.target.files[0]));
         document.getElementById('file-upload-menu').addEventListener('change', (e) => loadDocument(e.target.files[0]));
 
+        // PERBAIKAN: Logika saat memuat PDF dari URL GitHub
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const externalPdfUrl = urlParams.get('buka');
 
             if (externalPdfUrl) {
                 document.getElementById('btn-open-initial').style.display = 'none';
-                loader.textContent = 'Memuat dokumen... ⏳'; 
+                loader.innerHTML = 'Memuat dokumen... ⏳<br><small style="font-size:10px; font-weight:normal;">Mungkin butuh beberapa detik tergantung sinyal internet</small>'; 
                 loader.classList.remove('hidden');
 
                 try {
@@ -258,8 +211,13 @@
                     pdfDoc = await pdfjsLib.getDocument(externalPdfUrl).promise;
                     pdfContainer.innerHTML = ''; activeCanvases = []; undoStack = [];
                     for (let i = 1; i <= pdfDoc.numPages; i++) await renderPage(i);
+                    
+                    // OTOMATIS BUKA MENU SAAT PDF SELESAI DIMUAT
+                    toggleMenu();
+
                 } catch (err) {
-                    alert('Gagal memuat PDF secara otomatis.');
+                    console.error("Detail Error PDF.js:", err);
+                    alert('Gagal memuat PDF dari tautan!\n\nPastikan Anda menggunakan link "RAW" GitHub yang berakhiran .pdf, bukan link halaman web biasa.\n\nPesan Error: ' + err.message);
                     document.getElementById('btn-open-initial').style.display = 'flex'; 
                 }
                 loader.classList.add('hidden'); 
@@ -345,6 +303,7 @@
             }
         });
 
+        // --- SISA SCRIPT CANVAS DAN GAMBAR TETAP SAMA ---
         let storedSignature = null;
         const sigModal = document.getElementById('signature-modal');
         const sigCanvas = document.getElementById('signature-canvas');
