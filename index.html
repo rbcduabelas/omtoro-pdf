@@ -560,6 +560,35 @@
             canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', stopDraw);
             canvas.addEventListener('touchstart', startDraw, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); window.addEventListener('touchend', stopDraw);
         }
+
+        // --- PENANGKAP FILE OFFLINE DARI ARKA BELAJAR ---
+        window.addEventListener('message', async (event) => {
+            if(event.data && event.data.type === 'LOAD_OFFLINE_PDF') {
+                document.getElementById('btn-open-initial').style.display = 'none';
+                loader.innerHTML = 'Membaca PDF Offline... ⏳<br><small style="font-size:10px; font-weight:normal;">Memuat dari memori perangkat</small>';
+                loader.classList.remove('hidden');
+                
+                const base64 = event.data.base64;
+                currentFileName = event.data.filename || "Buku-Offline";
+                
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                
+                try {
+                    pdfDoc = await pdfjsLib.getDocument(byteArray).promise;
+                    pdfContainer.innerHTML = ''; activeCanvases = []; undoStack = [];
+                    for (let i = 1; i <= pdfDoc.numPages; i++) await renderPage(i);
+                    
+                    toggleMenu();
+                } catch (err) { alert('Gagal memuat PDF offline: ' + err.message); }
+                loader.classList.add('hidden');
+            }
+        });
+        // --- AKHIR PENANGKAP FILE OFFLINE ---
         
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
